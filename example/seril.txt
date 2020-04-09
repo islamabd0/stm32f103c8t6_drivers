@@ -1,0 +1,130 @@
+#include "stm32f10x.h"
+#include "_HAL_GPIO.h"
+#include "_HAL_UART.h"
+#include "string.h "
+
+#define delay    for (int i=0; i<=5000000; i++)
+
+int main()
+{
+	
+	UART_TYPE myuart;
+	myuart.USART = USART1;
+	myuart.BaudRate = 9600;
+	
+	uart_init(myuart);
+
+	
+
+	
+	while(1)
+	{
+		char print[20] = "hello world\n";
+		
+		
+			
+			for(int i=0; i<strlen(print);i++)
+			{
+				
+					USART1->DR = print[i];
+					while (!(USART1->SR & USART_SR_TXE));
+					while (!(USART1->SR & USART_SR_TC));
+				 USART1->SR &= ~ USART_SR_TC ;
+			}
+			
+	
+		
+		delay;
+	
+	}
+	
+
+
+}
+
+void USART1_ISQHandler()
+{
+	//check if we are here because of RXNE interrupt
+ if (USART1->SR & USART_SR_RXNE) //if RX is not empty
+ {
+  char temp = USART1->DR; //fetch the data received
+  USART1->DR = temp;  //send it back out
+  while (!(USART1->SR & USART_SR_TC));
+
+ }
+}
+
+//***********************************************************************
+
+
+
+
+
+
+
+
+#include "stm32f10x.h"
+#include "_HAL_GPIO.h"
+#include "_HAL_UART.h"
+#include "string.h "
+
+#define delay    for (int i=0; i<=5000000; i++)
+char temp ;
+int main()
+{
+	
+	UART_TYPE myuart;
+	myuart.USART = USART1;
+	myuart.BaudRate = 9600;
+	
+	uart_init(myuart);
+
+	
+
+	//USART1->SR &= ~ USART_SR_TC ;
+	while(1)
+	{
+		char print[20] = "hello world\n";
+		
+		
+			
+			for(int i=0; i<strlen(print);i++)
+			{
+				
+					USART1->DR = print[i];
+					while (!(USART1->SR & USART_SR_TXE));
+					while (!(USART1->SR & USART_SR_TC));
+				// USART1->SR &= ~ USART_SR_TC ;
+			}
+			
+	
+		
+		delay;
+	
+	}
+	
+
+
+}
+
+void USART1_IRQHandler()
+{
+	int x=0;
+	//check if we are here because of RXNE interrupt
+ if (USART1->SR & USART_SR_RXNE) //if RX is not empty
+ {
+  temp = USART1->DR; //fetch the data received
+  USART1->DR = temp;  //send it back out
+  while (!(USART1->SR & USART_SR_TC));
+
+ }
+ 
+ //check if we are here because of TXEIE interrupt
+ if (USART1->SR & USART_SR_TXE) //if RX is not empty
+ {
+  //handle transmit completion here
+	 x++;
+
+ }
+}
+

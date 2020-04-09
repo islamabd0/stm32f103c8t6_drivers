@@ -1,0 +1,43 @@
+/* Includes */
+
+#include "stm32f10x.h"
+
+int main(void) {
+
+
+ //-----------------------| UART CODE |------------------------------------------
+        //USART1 / GPIOA clock enable
+ RCC->APB2ENR |= RCC_APB2ENR_USART1EN | RCC_APB2ENR_IOPAEN; 
+
+ //remaping if needed
+ //AFIO->MAPR |= AFIO_MAPR_USART1_REMAP ; //remap RX TX to PB7 PB6
+
+ //pin configurations: PA9- TX is set to ALternate-push-pull and 50MHz
+ GPIOA->CRH |= GPIO_CRH_MODE9 | GPIO_CRH_CNF9_1;
+ GPIOA->CRH &= ~(GPIO_CRH_CNF9_0);
+
+ /*
+  * PIN PA10 is the RX pin and it has to be set to input &FLOATING
+  * this is the rest value of the pin so we dont do anything to it
+  *
+  * */
+
+ //USART DIV value
+ USART1->BRR = 0x1D4C; //for 72MHZ on APB2 bus
+
+ //----------  RX enable        TX enable     UART enable
+ USART1->CR1 |= USART_CR1_RE | USART_CR1_TE | USART_CR1_UE;
+
+ while (1) {
+
+  if (USART1->SR & USART_SR_RXNE) //if RX is not empty
+  {
+   char temp = USART1->DR; //fetch the data received
+   USART1->DR = temp;  //send it back out
+   while (!(USART1->SR & USART_SR_TC)); //wait for TX to be complete
+		USART1->SR &= ~USART_SR_TC;
+
+  }
+
+ }
+ }

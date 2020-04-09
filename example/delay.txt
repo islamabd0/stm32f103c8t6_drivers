@@ -1,0 +1,105 @@
+/* Includes */
+
+#include "stm32f10x.h"
+#include "_printMsg.h"
+
+//void initDebug(void);
+
+
+//#define delay   for ( int i =0 ; i<5000000;i++)
+
+
+
+void dUs(int uS);
+void dMs(int mS);
+
+int myTicks = 0;
+
+int main(void) 
+{
+	
+	printMsg_init();
+
+	
+	//RCC->APB2ENR |= RCC_APB2ENR_IOPBEN ;  //enaple port B
+	RCC->APB1ENR |= RCC_APB1ENR_TIM4EN ; //enable timer4
+	
+	//PB9 alt output 50 hz
+//	GPIOB->CRH |= GPIO_CRH_MODE9 | GPIO_CRH_CNF9_1;
+	//GPIOB->CRH &= ~(GPIO_CRH_CNF9_0);
+	
+/*	
+	TIM4->CCER |= TIM_CCER_CC4E;
+	TIM4->CR1 |= TIM_CR1_ARPE;
+	TIM4->CCMR2 |= TIM_CCMR2_OC4M_1 | TIM_CCMR2_OC4M_2 |TIM_CCMR2_OC4PE;
+	*/
+	TIM4->PSC = 0;
+	TIM4->ARR = 144; //fre 1MHz
+	//TIM4->CCR4 =500;//duty cicle 
+	
+	/*
+	TIM4->EGR |= TIM_EGR_UG;
+	TIM4->CR1 |= TIM_CR1_CEN;
+	*/
+	TIM4->CR1 |=TIM_CR1_URS; //Only counter overflow/underflow generates an update interrupt
+	TIM4->DIER |= TIM_DIER_UIE ; //UIE: Update interrupt enable
+	TIM4->EGR |= TIM_EGR_UG; //UG: Update generation
+	// TIM4->CR1 |= TIM_CR1_CEN; //COUNTER TIMER
+	
+	NVIC_EnableIRQ(TIM4_IRQn);
+	
+	
+	
+	printMsg("UART CONNECTION \r\n");
+	
+	
+	
+	while (1) {
+
+ 
+	//	char x[20] = "hello";
+		printMsg("hi \n" );
+	//	printMsg("%s %.2f\n" ,x ,54.0 );
+	 // dUs(1000000);
+		dMs(1000);
+ }
+
+
+
+}
+
+void dUs(int uS)
+{
+	TIM4->CR1 |= TIM_CR1_CEN;
+	myTicks = 0;
+	while(myTicks<(uS));
+	
+	TIM4->CR1 &= ~TIM_CR1_CEN;
+}
+
+
+
+void dMs(int mS)
+{
+	TIM4->CR1 |= TIM_CR1_CEN;
+	myTicks = 0;
+	while(myTicks<(mS *1000));
+	
+	TIM4->CR1 &= ~TIM_CR1_CEN;
+}
+
+
+
+
+
+void TIM4_IRQHandler(void)
+{
+	/*
+	if(TIM4->SR & TIM_SR_UIF)//IF UPDATE EVEN OCCURED
+	{
+		myTicks++;
+	}
+	*/
+	myTicks++;
+	TIM4->SR &= ~TIM_SR_UIF;
+}

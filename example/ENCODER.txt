@@ -1,0 +1,76 @@
+#include "stm32f10x.h"
+#include "_HAL_GPIO.h"
+
+long encoder = 0, counter = 0;
+void encoderPinChangeA(void);
+void encoderPinChangeB(void);
+
+int main()
+{
+
+	GPIO_TYPE myGPIO;
+
+	myGPIO.port = PORTA;
+	myGPIO.pin = 3;
+	myGPIO.mode = INPUT_MODE;
+	myGPIO.mode_type = INPUT_PU_PO;
+	myGPIO.pull = PULLUP;
+	
+	gpio_init(myGPIO);
+	
+	myGPIO.port = PORTA;
+	myGPIO.pin = 4;
+	myGPIO.mode = INPUT_MODE;
+	myGPIO.mode_type = INPUT_PU_PO;
+	myGPIO.pull = PULLUP;
+	
+	gpio_init(myGPIO);
+	
+	configure_gpio_interrupt(PORTA, 3,RISING_FALLING_EDGE , PULLUP);
+	enable_gpio_interrupt(3, EXTI3_IRQn);
+	
+	configure_gpio_interrupt(PORTA, 4,RISING_FALLING_EDGE , PULLUP);
+	enable_gpio_interrupt(4, EXTI4_IRQn);
+	
+	
+	while(1)
+	{
+			encoder = counter;
+
+	}
+	
+
+
+}
+
+void EXTI3_IRQHandler()
+{
+	if(check_gpio_pin_interrupt(3))
+	{
+		clear_gpio_interrupt(3);
+		encoderPinChangeA();
+	}
+	
+}
+
+void EXTI4_IRQHandler()
+{
+	if(check_gpio_pin_interrupt(4))
+	{
+		clear_gpio_interrupt(4);
+		encoderPinChangeB();
+	}
+	
+}
+
+void encoderPinChangeA()
+{
+  counter += gpio_digital_read(PORTA,3) == gpio_digital_read(PORTA,4) ? -1 : 1;
+}
+
+void encoderPinChangeB()
+{
+  counter += gpio_digital_read(PORTA,3) != gpio_digital_read(PORTA,4) ? -1 : 1;
+}
+
+

@@ -1,0 +1,29 @@
+/* Includes */
+
+#include "stm32f10x.h"
+#include "_printMsg.h"
+
+#define delay   for ( int i =0 ; i<5000000;i++)
+
+
+
+int main(void) 
+{
+	
+	
+	printMsg_init();
+	
+	
+	while (1) {
+
+ 
+		char x[20] = "hello";
+		printMsg("%s %d\n" ,x ,54 );
+		printMsg("%s %.2f\n" ,x ,54.0 );
+	  delay;
+ }
+
+
+
+}
+

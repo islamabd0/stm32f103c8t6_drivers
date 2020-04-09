@@ -1,0 +1,32 @@
+/* Includes */
+
+#include "stm32f10x.h"
+#include "_printMsg.h"
+
+
+
+
+int main(void) 
+{
+	
+	printMsg_init();
+
+	
+	RCC->APB1ENR |= RCC_APB1ENR_TIM4EN ;
+	TIM4->PSC = 65535;
+	TIM4->ARR = 6000;
+	TIM4->CR1 |= TIM_CR1_CEN;
+	//COUNT DOWN
+//	TIM4->CR1 |= TIM_CR1_DIR;  // 0 = upcounter , 1 = downcounter
+	//counts up and down
+//	TIM4->CR1 |= TIM_CR1_CMS; // The counter counts up and down alternatively.
+	
+	printMsg("start");
+	while(1)
+	{
+		//printMsg("");
+		printMsg("%d\r \n" , TIM4->CNT);
+	
+	} 
+}
+
